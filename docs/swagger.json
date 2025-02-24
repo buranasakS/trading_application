@@ -1,0 +1,589 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a Golang Application For Backend Candidate Test",
+        "title": "Trading Application API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/affiliates": {
+            "post": {
+                "description": "Create a new affiliate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Affiliates"
+                ],
+                "summary": "Create a new affiliate",
+                "parameters": [
+                    {
+                        "description": "Affiliate details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RequestAffiliate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Affiliate created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/db.Affiliate"
+                        }
+                    }
+                }
+            }
+        },
+        "/affiliates/list": {
+            "get": {
+                "description": "List all affiliates",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Affiliates"
+                ],
+                "summary": "List all affiliates",
+                "responses": {
+                    "200": {
+                        "description": "List of affiliates",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/db.Affiliate"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/affiliates/{id}": {
+            "get": {
+                "description": "Get affiliate by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Affiliates"
+                ],
+                "summary": "Get affiliate by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Affiliate ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Affiliate details",
+                        "schema": {
+                            "$ref": "#/definitions/db.Affiliate"
+                        }
+                    }
+                }
+            }
+        },
+        "/commissions/list": {
+            "get": {
+                "description": "List all commissions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Commissions"
+                ],
+                "summary": "List all commissions",
+                "responses": {
+                    "200": {
+                        "description": "List of commissions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/db.Commission"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/commissions/{id}": {
+            "get": {
+                "description": "Get commission by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Commissions"
+                ],
+                "summary": "Get commission by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Commission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Commission details",
+                        "schema": {
+                            "$ref": "#/definitions/db.Commission"
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
+            "post": {
+                "description": "Create a new product details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create a new product",
+                "parameters": [
+                    {
+                        "description": "Product details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/db.CreateProductParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/db.Product"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/list": {
+            "get": {
+                "description": "List all products",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List all products",
+                "responses": {
+                    "200": {
+                        "description": "List of products",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/db.Product"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{id}": {
+            "get": {
+                "description": "Retrieve product details by their unique ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get product details by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.Product"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "post": {
+                "description": "Create a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "User details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/db.CreateUserParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/db.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/add/balance/{id}": {
+            "patch": {
+                "description": "add balance to user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Add user balance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Amount to add",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RequestAmount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Balance added successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/all": {
+            "get": {
+                "description": "Fetch a paginated list of users from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List all users with pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of users per page (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResponseUser"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/deduct/balance/{id}": {
+            "patch": {
+                "description": "deduct balance from user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Deduct user balance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Amount to deduct",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RequestAmount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Balance deducted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Retrieve user details by their unique ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user details by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.User"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "db.Affiliate": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "masterAffiliate": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.Commission": {
+            "type": "object",
+            "properties": {
+                "affiliateID": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "orderID": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.CreateProductParams": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "db.CreateUserParams": {
+            "type": "object",
+            "properties": {
+                "affiliateID": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.Product": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "db.User": {
+            "type": "object",
+            "properties": {
+                "affiliateID": {
+                    "type": "string"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.RequestAffiliate": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "master_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.RequestAmount": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "handlers.ResponseUser": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/db.User"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total_count": {
+                    "type": "integer"
+                },
+                "total_page": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

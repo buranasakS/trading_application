@@ -1,0 +1,384 @@
+basePath: /
+definitions:
+  db.Affiliate:
+    properties:
+      balance:
+        type: number
+      id:
+        type: string
+      masterAffiliate:
+        type: string
+      name:
+        type: string
+    type: object
+  db.Commission:
+    properties:
+      affiliateID:
+        type: string
+      amount:
+        type: number
+      id:
+        type: string
+      orderID:
+        type: string
+    type: object
+  db.CreateProductParams:
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  db.CreateUserParams:
+    properties:
+      affiliateID:
+        type: string
+      username:
+        type: string
+    type: object
+  db.Product:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  db.User:
+    properties:
+      affiliateID:
+        type: string
+      balance:
+        type: number
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  handlers.RequestAffiliate:
+    properties:
+      master_id:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handlers.RequestAmount:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
+  handlers.ResponseUser:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/db.User'
+        type: array
+      page:
+        type: integer
+      total_count:
+        type: integer
+      total_page:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a Golang Application For Backend Candidate Test
+  title: Trading Application API
+  version: "1.0"
+paths:
+  /affiliates:
+    post:
+      consumes:
+      - application/json
+      description: Create a new affiliate
+      parameters:
+      - description: Affiliate details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RequestAffiliate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Affiliate created successfully
+          schema:
+            $ref: '#/definitions/db.Affiliate'
+      summary: Create a new affiliate
+      tags:
+      - Affiliates
+  /affiliates/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get affiliate by ID
+      parameters:
+      - description: Affiliate ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Affiliate details
+          schema:
+            $ref: '#/definitions/db.Affiliate'
+      summary: Get affiliate by ID
+      tags:
+      - Affiliates
+  /affiliates/list:
+    get:
+      consumes:
+      - application/json
+      description: List all affiliates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of affiliates
+          schema:
+            items:
+              $ref: '#/definitions/db.Affiliate'
+            type: array
+      summary: List all affiliates
+      tags:
+      - Affiliates
+  /commissions/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get commission by ID
+      parameters:
+      - description: Commission ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Commission details
+          schema:
+            $ref: '#/definitions/db.Commission'
+      summary: Get commission by ID
+      tags:
+      - Commissions
+  /commissions/list:
+    get:
+      consumes:
+      - application/json
+      description: List all commissions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of commissions
+          schema:
+            items:
+              $ref: '#/definitions/db.Commission'
+            type: array
+      summary: List all commissions
+      tags:
+      - Commissions
+  /products:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product details
+      parameters:
+      - description: Product details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db.CreateProductParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product created successfully
+          schema:
+            $ref: '#/definitions/db.Product'
+      summary: Create a new product
+      tags:
+      - Products
+  /products/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve product details by their unique ID
+      parameters:
+      - description: Product ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Product'
+      summary: Get product details by ID
+      tags:
+      - Products
+  /products/list:
+    get:
+      consumes:
+      - application/json
+      description: List all products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of products
+          schema:
+            items:
+              $ref: '#/definitions/db.Product'
+            type: array
+      summary: List all products
+      tags:
+      - Products
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db.CreateUserParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/db.User'
+      summary: Create a new user
+      tags:
+      - Users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve user details by their unique ID
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.User'
+      summary: Get user details by ID
+      tags:
+      - Users
+  /users/add/balance/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: add balance to user account
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Amount to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RequestAmount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Balance added successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add user balance
+      tags:
+      - Users
+  /users/all:
+    get:
+      consumes:
+      - application/json
+      description: Fetch a paginated list of users from the database
+      parameters:
+      - description: Number of users per page (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ResponseUser'
+      summary: List all users with pagination
+      tags:
+      - Users
+  /users/deduct/balance/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: deduct balance from user account
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Amount to deduct
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RequestAmount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Balance deducted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Deduct user balance
+      tags:
+      - Users
+swagger: "2.0"
