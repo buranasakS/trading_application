@@ -24,11 +24,6 @@ type RequestAmount struct {
 	Amount float64 `json:"amount" binding:"required"`
 }
 
-type OrderRequest struct {
-	UserID    pgtype.UUID `json:"user_id"`
-	ProductID pgtype.UUID `json:"product_id"`
-	Quantity  int         `json:"quantity"`
-}
 
 // CreateUserHandler godoc
 // @Summary      Create a new user
@@ -295,22 +290,5 @@ func AddUserBalanceHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
-
-// func UserBuyProductHandler(c *gin.Context) {
-// 	var req OrderRequest
-// 	if err := c.ShouldBindJSON(&req); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-// 		return
-// 	}
-
-// 	queries := db.New(config.ConnectDatabase().DB)
-
-// 	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to start transaction"})
-// 		return
-// 	}
-
-// }
 
 

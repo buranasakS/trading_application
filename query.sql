@@ -18,12 +18,14 @@ SELECT id, name, master_affiliate, balance FROM affiliates;
 -- name: GetAffiliateByID :one
 SELECT id, name, master_affiliate, balance FROM affiliates WHERE id = $1;
 
+-- name: CreateCommission :one
+INSERT INTO commissions (order_id, affiliate_id, amount) VALUES ($1, $2, $3) RETURNING *;
+
 -- name: GetCommissionByID :one
 SELECT id, order_id, affiliate_id, amount FROM commissions WHERE id = $1;
   
 -- name: ListCommissions :many
 SELECT id, order_id, affiliate_id, amount FROM commissions;
-
 
 -- name: CreateUser :one
 INSERT INTO users (username, affiliate_id) VALUES ($1, $2) RETURNING *;
@@ -51,3 +53,12 @@ SELECT EXISTS(SELECT 1 FROM users WHERE id = $1);
 
 -- name: UserBalance :one
 SELECT id, balance FROM users WHERE id = $1;
+
+-- name: DeductProductQuantity :execrows
+UPDATE products SET quantity = quantity - $1 WHERE id = $2 AND quantity >= $1;
+
+-- name: GetAffiliateByUserID :one
+SELECT id, master_affiliate FROM affiliates WHERE id = $1;
+
+-- name: AddAffiliateBalance :exec
+UPDATE affiliates SET balance = balance + $1 WHERE id = $2;

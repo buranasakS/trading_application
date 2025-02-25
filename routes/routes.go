@@ -3,12 +3,11 @@ package routes
 import (
 	"github.com/buranasakS/trading_application/handlers"
 	"github.com/gin-gonic/gin"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRoutes(router *gin.Engine) {
-
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	productRoutes := router.Group("/products")
@@ -38,5 +37,7 @@ func SetupRoutes(router *gin.Engine) {
 		userRoutes.GET("/:id", handlers.GetUserDetailByIDHandler)
 		userRoutes.PATCH("/deduct/balance/:id", handlers.DeductUserBalanceHandler)
 		userRoutes.PATCH("/add/balance/:id", handlers.AddUserBalanceHandler)
+		userRoutes.POST("/buy", handlers.UserBuyProductHandler)
 	}
+
 }

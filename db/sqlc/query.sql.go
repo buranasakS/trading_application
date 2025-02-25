@@ -11,6 +11,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addAffiliateBalance = `-- name: AddAffiliateBalance :exec
+UPDATE affiliates SET balance = balance + $1 WHERE id = $2
+`
+
+type AddAffiliateBalanceParams struct {
+	Balance float64
+	ID      pgtype.UUID
+}
+
+func (q *Queries) AddAffiliateBalance(ctx context.Context, arg AddAffiliateBalanceParams) error {
+	_, err := q.db.Exec(ctx, addAffiliateBalance, arg.Balance, arg.ID)
+	return err
+}
+
 const addUserBalance = `-- name: AddUserBalance :exec
 UPDATE users SET balance = balance + $1 WHERE id = $2
 `
@@ -70,6 +84,28 @@ func (q *Queries) CreateAffiliate(ctx context.Context, arg CreateAffiliateParams
 	return i, err
 }
 
+const createCommission = `-- name: CreateCommission :one
+INSERT INTO commissions (order_id, affiliate_id, amount) VALUES ($1, $2, $3) RETURNING id, order_id, affiliate_id, amount
+`
+
+type CreateCommissionParams struct {
+	OrderID     pgtype.UUID
+	AffiliateID pgtype.UUID
+	Amount      float64
+}
+
+func (q *Queries) CreateCommission(ctx context.Context, arg CreateCommissionParams) (Commission, error) {
+	row := q.db.QueryRow(ctx, createCommission, arg.OrderID, arg.AffiliateID, arg.Amount)
+	var i Commission
+	err := row.Scan(
+		&i.ID,
+		&i.OrderID,
+		&i.AffiliateID,
+		&i.Amount,
+	)
+	return i, err
+}
+
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (name, quantity, price) VALUES ($1, $2, $3) RETURNING id, name, quantity, price
 `
@@ -113,6 +149,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deductProductQuantity = `-- name: DeductProductQuantity :execrows
+UPDATE products SET quantity = quantity - $1 WHERE id = $2 AND quantity >= $1
+`
+
+type DeductProductQuantityParams struct {
+	Quantity int32
+	ID       pgtype.UUID
+}
+
+func (q *Queries) DeductProductQuantity(ctx context.Context, arg DeductProductQuantityParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deductProductQuantity, arg.Quantity, arg.ID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const deductUserBalance = `-- name: DeductUserBalance :execrows
 UPDATE users SET balance = balance - $1 WHERE id = $2 AND balance >= $1
 `
@@ -143,6 +196,22 @@ func (q *Queries) GetAffiliateByID(ctx context.Context, id pgtype.UUID) (Affilia
 		&i.MasterAffiliate,
 		&i.Balance,
 	)
+	return i, err
+}
+
+const getAffiliateByUserID = `-- name: GetAffiliateByUserID :one
+SELECT id, master_affiliate FROM affiliates WHERE id = $1
+`
+
+type GetAffiliateByUserIDRow struct {
+	ID              pgtype.UUID
+	MasterAffiliate pgtype.UUID
+}
+
+func (q *Queries) GetAffiliateByUserID(ctx context.Context, id pgtype.UUID) (GetAffiliateByUserIDRow, error) {
+	row := q.db.QueryRow(ctx, getAffiliateByUserID, id)
+	var i GetAffiliateByUserIDRow
+	err := row.Scan(&i.ID, &i.MasterAffiliate)
 	return i, err
 }
 
