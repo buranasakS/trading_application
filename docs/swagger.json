@@ -410,6 +410,40 @@
                 }
             }
         },
+        "/users/order": {
+            "post": {
+                "description": "ordering a product and calculate commission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User ordering a product"
+                ],
+                "summary": "ordering a product and calculate commission",
+                "parameters": [
+                    {
+                        "description": "Order product detail",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.OrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Order completed",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.OrderResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "Retrieve user details by their unique ID",
@@ -534,6 +568,37 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.OrderRequest": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_cost": {
+                    "type": "number"
                 }
             }
         },

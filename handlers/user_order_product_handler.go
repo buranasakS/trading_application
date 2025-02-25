@@ -18,7 +18,23 @@ type OrderRequest struct {
 	Quantity  int         `json:"quantity"`
 }
 
-func UserBuyProductHandler(c *gin.Context) {
+type OrderResponse struct {
+	Status    string  `json:"status"`
+	Message   string  `json:"message"`
+	OrderID   string  `json:"order_id"`
+	TotalCost float64 `json:"total_cost"`
+}
+
+// UserOrderProductHandler godoc
+// @Summary      ordering a product and calculate commission
+// @Description  ordering a product and calculate commission
+// @Tags         User ordering a product
+// @Accept       json
+// @Produce      json
+// @Param        request body    OrderRequest true "Order product detail"
+// @Success      201  {object}   OrderResponse  "Order completed"
+// @Router       /users/order [post]
+func UserOrderProductHandler(c *gin.Context) {
 	var req OrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
@@ -149,7 +165,7 @@ func UserBuyProductHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusCreated, gin.H{
 		"status":     "success",
 		"message":    "Purchase completed",
 		"order_id":   orderID,

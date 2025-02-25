@@ -60,6 +60,26 @@ definitions:
       username:
         type: string
     type: object
+  handlers.OrderRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  handlers.OrderResponse:
+    properties:
+      message:
+        type: string
+      order_id:
+        type: string
+      status:
+        type: string
+      total_cost:
+        type: number
+    type: object
   handlers.RequestAffiliate:
     properties:
       master_id:
@@ -381,4 +401,26 @@ paths:
       summary: Deduct user balance
       tags:
       - Users
+  /users/order:
+    post:
+      consumes:
+      - application/json
+      description: ordering a product and calculate commission
+      parameters:
+      - description: Order product detail
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Order completed
+          schema:
+            $ref: '#/definitions/handlers.OrderResponse'
+      summary: ordering a product and calculate commission
+      tags:
+      - User ordering a product
 swagger: "2.0"

@@ -31,7 +31,7 @@ type RequestAmount struct {
 // @Tags         Users
 // @Accept       json
 // @Produce      json
-// @Param        request body   db.CreateUserParams true "User details"
+// @Param        request body      db.CreateUserParams true "User details"
 // @Success      201  {object}  db.User "User created successfully"
 // @Router       /users [post]
 func CreateUserHandler(c *gin.Context) {

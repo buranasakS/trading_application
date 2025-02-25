@@ -37,7 +37,7 @@ func SetupRoutes(router *gin.Engine) {
 		userRoutes.GET("/:id", handlers.GetUserDetailByIDHandler)
 		userRoutes.PATCH("/deduct/balance/:id", handlers.DeductUserBalanceHandler)
 		userRoutes.PATCH("/add/balance/:id", handlers.AddUserBalanceHandler)
-		userRoutes.POST("/buy", handlers.UserBuyProductHandler)
+		userRoutes.POST("/order", handlers.UserOrderProductHandler)
 	}
 
 }
