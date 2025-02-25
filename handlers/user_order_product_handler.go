@@ -41,6 +41,11 @@ func UserOrderProductHandler(c *gin.Context) {
 		return
 	}
 
+	if req.Quantity < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Quantity must be more than 0"})
+		return
+	}
+
 	queries := db.New(config.ConnectDatabase().DB)
 	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
