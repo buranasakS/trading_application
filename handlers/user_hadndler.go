@@ -3,27 +3,115 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/buranasakS/trading_application/config"
 	db "github.com/buranasakS/trading_application/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ResponseUser struct {
-	Page       int32     `json:"page"`
-	TotalPage  int32     `json:"total_page"`
-	Count      int32     `json:"count"`
-	TotalCount int32     `json:"total_count"`
-	Data       []db.User `json:"data"`
+	Page       int32   `json:"page"`
+	TotalPage  int32   `json:"total_page"`
+	Count      int32   `json:"count"`
+	TotalCount int32   `json:"total_count"`
+	Data       []Users `json:"data"`
+}
+type Users struct {
+	ID          pgtype.UUID `json:"id"`
+	Username    string      `json:"username"`
+	Balance     float64     `json:"balance"`
+	AffiliateID pgtype.UUID `json:"affiliate_id"`
 }
 
 type RequestAmount struct {
 	Amount float64 `json:"amount" binding:"required"`
 }
 
+func LoginUser(c *gin.Context) {
+	var req struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
+
+	queries := db.New(config.ConnectDatabase().DB)
+	user, err := queries.GetUserByUsernameForLogin(context.Background(), req.Username)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"Error": "Invalid username or password"})
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Invalid username or password"})
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":      user.ID,
+		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+		"iat":      time.Now().Unix(),
+		"username": user.Username,
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": tokenString,
+	})
+}
+
+func RegisterUser(c *gin.Context) {
+	var req struct {
+		Username    string      `json:"username" binding:"required"`
+		Password    string      `json:"password" binding:"required"`
+		AffiliateID pgtype.UUID `json:"affiliate_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to hash password"})
+		return
+	}
+
+	queries := db.New(config.ConnectDatabase().DB)
+	user, err := queries.CreateUser(context.Background(), db.CreateUserParams{
+		Username:    req.Username,
+		Password:    string(hashedPassword),
+		AffiliateID: req.AffiliateID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create user"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, Users{
+		ID:          user.ID,
+		Username:    user.Username,
+		Balance:     user.Balance,
+		AffiliateID: user.AffiliateID,
+	})
+}
 
 // CreateUserHandler godoc
 // @Summary      Create a new user
@@ -34,29 +122,29 @@ type RequestAmount struct {
 // @Param        request body      db.CreateUserParams true "User details"
 // @Success      201  {object}  db.User "User created successfully"
 // @Router       /users [post]
-func CreateUserHandler(c *gin.Context) {
-	var req struct {
-		Username    string      `json:"username" binding:"required"`
-		AffiliateID pgtype.UUID `json:"affiliate_id" binding:"required"`
-	}
+// func CreateUserHandler(c *gin.Context) {
+// 	var req struct {
+// 		Username    string      `json:"username" binding:"required"`
+// 		AffiliateID pgtype.UUID `json:"affiliate_id" binding:"required"`
+// 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-		return
-	}
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+// 		return
+// 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
-	user, err := queries.CreateUser(context.Background(), db.CreateUserParams{
-		Username:    req.Username,
-		AffiliateID: req.AffiliateID,
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create user"})
-		return
-	}
+// 	queries := db.New(config.ConnectDatabase().DB)
+// 	user, err := queries.CreateUser(context.Background(), db.CreateUserParams{
+// 		Username:    req.Username,
+// 		AffiliateID: req.AffiliateID,
+// 	})
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create user"})
+// 		return
+// 	}
 
-	c.JSON(http.StatusCreated, user)
-}
+// 	c.JSON(http.StatusCreated, user)
+// }
 
 // ListUsersHandler godoc
 // @Summary      List all users with pagination
@@ -94,13 +182,23 @@ func ListUsersHandler(c *gin.Context) {
 	offset := (page - 1) * limit
 
 	queries := db.New(config.ConnectDatabase().DB)
-	users, err := queries.ListUsers(context.Background(), db.ListUsersParams{
+	userRows, err := queries.ListUsers(context.Background(), db.ListUsersParams{
 		Limit:  int32(limit),
 		Offset: int32(offset),
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch users"})
 		return
+	}
+
+	var users []Users
+	for _, userRow := range userRows {
+		users = append(users, Users{
+			ID:          userRow.ID,
+			Username:    userRow.Username,
+			Balance:     userRow.Balance,
+			AffiliateID: userRow.AffiliateID,
+		})
 	}
 
 	totalCount := len(users)
@@ -290,5 +388,3 @@ func AddUserBalanceHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
-
-

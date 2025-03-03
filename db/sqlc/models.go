@@ -32,6 +32,7 @@ type Product struct {
 type User struct {
 	ID          pgtype.UUID
 	Username    string
+	Password    string
 	Balance     float64
 	AffiliateID pgtype.UUID
 }

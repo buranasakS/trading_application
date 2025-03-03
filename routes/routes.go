@@ -10,6 +10,11 @@ import (
 func SetupRoutes(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// protected := router.Group("/", middleware.JwtMiddleware())
+
+	router.POST("/login", handlers.LoginUser)
+	router.POST("/register", handlers.RegisterUser)
+
 	productRoutes := router.Group("/products")
 	{
 		productRoutes.POST("/", handlers.CreateProductHandler)
@@ -32,12 +37,15 @@ func SetupRoutes(router *gin.Engine) {
 
 	userRoutes := router.Group("/users")
 	{
-		userRoutes.POST("/", handlers.CreateUserHandler)
+		// userRoutes.POST("/login", handlers.LoginUser)
+		// userRoutes.POST("/register", handlers.RegisterUser)
 		userRoutes.GET("/all", handlers.ListUsersHandler)
 		userRoutes.GET("/:id", handlers.GetUserDetailByIDHandler)
 		userRoutes.PATCH("/deduct/balance/:id", handlers.DeductUserBalanceHandler)
 		userRoutes.PATCH("/add/balance/:id", handlers.AddUserBalanceHandler)
 		userRoutes.POST("/order", handlers.UserOrderProductHandler)
 	}
+
+	
 
 }

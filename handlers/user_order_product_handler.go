@@ -1,4 +1,4 @@
-package handlers
+ package handlers
 
 import (
 	"context"
@@ -97,20 +97,19 @@ func UserOrderProductHandler(c *gin.Context) {
 		return
 	}
 
-	orderID := uuid.New()
-
+	orderID := uuid.New()	
 	if user.AffiliateID.Valid {
 		affililates := []db.Affiliate{}
-		currentID := user.AffiliateID
+		currentAffiliateID := user.AffiliateID
 
-		for currentID.Valid {
-			affiliate, err := qtx.GetAffiliateByID(context.Background(), currentID)
+		for currentAffiliateID.Valid {
+			affiliate, err := qtx.GetAffiliateByID(context.Background(), currentAffiliateID)
 			if err != nil || !affiliate.ID.Valid {
 				break
 			}
 
 			affililates = append(affililates, affiliate)
-			currentID = affiliate.MasterAffiliate
+			currentAffiliateID = affiliate.MasterAffiliate
 		}
 
 		if len(affililates) == 0 {
@@ -118,7 +117,6 @@ func UserOrderProductHandler(c *gin.Context) {
 		}
 
 		commissionRates := []float64{0.05, 0.10, 0.15, 0.20}
-
 		commissionLevel := 0
 		if len(affililates) <= len(commissionRates) {
 			commissionLevel = len(commissionRates) - len(affililates)

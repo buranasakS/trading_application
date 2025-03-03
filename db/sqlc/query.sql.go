@@ -129,20 +129,22 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (username, affiliate_id) VALUES ($1, $2) RETURNING id, username, balance, affiliate_id
+INSERT INTO users (username, password, affiliate_id) VALUES ($1, $2, $3) RETURNING id, username, password, balance, affiliate_id
 `
 
 type CreateUserParams struct {
 	Username    string
+	Password    string
 	AffiliateID pgtype.UUID
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.AffiliateID)
+	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Password, arg.AffiliateID)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
+		&i.Password,
 		&i.Balance,
 		&i.AffiliateID,
 	)
@@ -247,13 +249,48 @@ func (q *Queries) GetProductByID(ctx context.Context, id pgtype.UUID) (Product, 
 	return i, err
 }
 
+const getUserByUsernameForLogin = `-- name: GetUserByUsernameForLogin :one
+SELECT id, username, password, affiliate_id, balance
+FROM users
+WHERE username = $1
+LIMIT 1
+`
+
+type GetUserByUsernameForLoginRow struct {
+	ID          pgtype.UUID
+	Username    string
+	Password    string
+	AffiliateID pgtype.UUID
+	Balance     float64
+}
+
+func (q *Queries) GetUserByUsernameForLogin(ctx context.Context, username string) (GetUserByUsernameForLoginRow, error) {
+	row := q.db.QueryRow(ctx, getUserByUsernameForLogin, username)
+	var i GetUserByUsernameForLoginRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.AffiliateID,
+		&i.Balance,
+	)
+	return i, err
+}
+
 const getUserDetailByID = `-- name: GetUserDetailByID :one
 SELECT id, username, balance, affiliate_id FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserDetailByID(ctx context.Context, id pgtype.UUID) (User, error) {
+type GetUserDetailByIDRow struct {
+	ID          pgtype.UUID
+	Username    string
+	Balance     float64
+	AffiliateID pgtype.UUID
+}
+
+func (q *Queries) GetUserDetailByID(ctx context.Context, id pgtype.UUID) (GetUserDetailByIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserDetailByID, id)
-	var i User
+	var i GetUserDetailByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -362,15 +399,22 @@ type ListUsersParams struct {
 	Offset int32
 }
 
-func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+type ListUsersRow struct {
+	ID          pgtype.UUID
+	Username    string
+	Balance     float64
+	AffiliateID pgtype.UUID
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error) {
 	rows, err := q.db.Query(ctx, listUsers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []ListUsersRow
 	for rows.Next() {
-		var i User
+		var i ListUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Username,

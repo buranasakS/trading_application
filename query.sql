@@ -28,7 +28,7 @@ SELECT id, order_id, affiliate_id, amount FROM commissions WHERE id = $1;
 SELECT id, order_id, affiliate_id, amount FROM commissions;
 
 -- name: CreateUser :one
-INSERT INTO users (username, affiliate_id) VALUES ($1, $2) RETURNING *;
+INSERT INTO users (username, password, affiliate_id) VALUES ($1, $2, $3) RETURNING *;
 
 -- name: ListUsers :many
 SELECT id, username, balance, affiliate_id
@@ -62,3 +62,9 @@ SELECT id, master_affiliate FROM affiliates WHERE id = $1;
 
 -- name: AddAffiliateBalance :exec
 UPDATE affiliates SET balance = balance + $1 WHERE id = $2;
+
+-- name: GetUserByUsernameForLogin :one
+SELECT id, username, password, affiliate_id, balance
+FROM users
+WHERE username = $1
+LIMIT 1;

@@ -1,6 +1,14 @@
+CREATE TABLE affiliates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    master_affiliate UUID,
+    balance DOUBLE PRECISION NOT NUll DEFAULT 0
+);
+
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username TEXT NOT NULL,
+    password TEXT NOT  NULL,
     balance DOUBLE PRECISION NOT NULL DEFAULT 0,
     affiliate_id UUID,
     FOREIGN KEY (affiliate_id) REFERENCES affiliates(id)
@@ -21,10 +29,5 @@ CREATE TABLE commissions (
     FOREIGN KEY (affiliate_id) REFERENCES affiliates(id)
 );
 
-CREATE TABLE affiliates (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    master_affiliate UUID,
-    balance DOUBLE PRECISION NOT NUll DEFAULT 0
-);
+
 
