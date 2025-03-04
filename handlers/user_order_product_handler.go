@@ -1,4 +1,4 @@
- package handlers
+package handlers
 
 import (
 	"context"
@@ -97,7 +97,7 @@ func UserOrderProductHandler(c *gin.Context) {
 		return
 	}
 
-	orderID := uuid.New()	
+	orderID := uuid.New()
 	if user.AffiliateID.Valid {
 		affililates := []db.Affiliate{}
 		currentAffiliateID := user.AffiliateID

@@ -1,7 +1,9 @@
 package routes
 
 import (
+	// db "github.com/buranasakS/trading_application/db/sqlc"
 	"github.com/buranasakS/trading_application/handlers"
+	"github.com/buranasakS/trading_application/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -16,6 +18,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.POST("/register", handlers.RegisterUser)
 
 	productRoutes := router.Group("/products")
+	productRoutes.Use(middleware.JwtMiddleware())
 	{
 		productRoutes.POST("/", handlers.CreateProductHandler)
 		productRoutes.GET("/list", handlers.ListProductsHandler)
@@ -23,6 +26,7 @@ func SetupRoutes(router *gin.Engine) {
 	}
 
 	affiliateRoutes := router.Group("/affiliates")
+	affiliateRoutes.Use(middleware.JwtMiddleware())
 	{
 		affiliateRoutes.POST("/", handlers.CreateAffiliateHandler)
 		affiliateRoutes.GET("/list", handlers.ListAffiliatesHandler)
@@ -30,12 +34,14 @@ func SetupRoutes(router *gin.Engine) {
 	}
 
 	commissionRoutes := router.Group("/commissions")
+	commissionRoutes.Use(middleware.JwtMiddleware())
 	{
 		commissionRoutes.GET("/list", handlers.ListCommissionsHandler)
 		commissionRoutes.GET("/:id", handlers.GetCommissionByIDHandler)
 	}
 
 	userRoutes := router.Group("/users")
+	userRoutes.Use(middleware.JwtMiddleware())
 	{
 		// userRoutes.POST("/login", handlers.LoginUser)
 		// userRoutes.POST("/register", handlers.RegisterUser)
@@ -45,7 +51,5 @@ func SetupRoutes(router *gin.Engine) {
 		userRoutes.PATCH("/add/balance/:id", handlers.AddUserBalanceHandler)
 		userRoutes.POST("/order", handlers.UserOrderProductHandler)
 	}
-
-	
 
 }

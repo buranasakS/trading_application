@@ -90,4 +90,3 @@ func GetAffiliateByIDHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, affiliate)
 }
-
