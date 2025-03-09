@@ -7,12 +7,16 @@ package db
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	BeginTx(ctx context.Context, options pgx.TxOptions) (pgx.Tx, error)
+	Commit(ctx context.Context) error
+	Rollback(ctx context.Context) error
 	AddAffiliateBalance(ctx context.Context, arg AddAffiliateBalanceParams) error
-	AddUserBalance(ctx context.Context, arg AddUserBalanceParams) error
+	AddUserBalance(ctx context.Context, arg AddUserBalanceParams) (int64, error)
 	CheckUserExists(ctx context.Context, id pgtype.UUID) (bool, error)
 	CountUsers(ctx context.Context) (int64, error)
 	CreateAffiliate(ctx context.Context, arg CreateAffiliateParams) (Affiliate, error)

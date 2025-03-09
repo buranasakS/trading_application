@@ -9,30 +9,30 @@ import (
 )
 
 type Affiliate struct {
-	ID              pgtype.UUID
-	Name            string
-	MasterAffiliate pgtype.UUID
-	Balance         float64
+	ID              pgtype.UUID `json:"id"`
+	Name            string      `json:"name"`
+	MasterAffiliate pgtype.UUID `json:"master_affiliate"`
+	Balance         float64     `json:"balance"`
 }
 
 type Commission struct {
-	ID          pgtype.UUID
-	OrderID     pgtype.UUID
-	AffiliateID pgtype.UUID
-	Amount      float64
+	ID          pgtype.UUID `json:"id"`
+	OrderID     pgtype.UUID `json:"order_id"`
+	AffiliateID pgtype.UUID `json:"affiliate_id"`
+	Amount      float64     `json:"amount"`
 }
 
 type Product struct {
-	ID       pgtype.UUID
-	Name     string
-	Quantity int32
-	Price    float64
+	ID       pgtype.UUID `json:"id"`
+	Name     string      `json:"name"`
+	Quantity int32       `json:"quantity"`
+	Price    float64     `json:"price"`
 }
 
 type User struct {
-	ID          pgtype.UUID
-	Username    string
-	Password    string
-	Balance     float64
-	AffiliateID pgtype.UUID
+	ID          pgtype.UUID `json:"id"`
+	Username    string      `json:"username"`
+	Password    string      `json:"password"`
+	Balance     float64     `json:"balance"`
+	AffiliateID pgtype.UUID `json:"affiliate_id"`
 }

@@ -6,20 +6,20 @@ definitions:
         type: number
       id:
         type: string
-      masterAffiliate:
+      master_affiliate:
         type: string
       name:
         type: string
     type: object
   db.Commission:
     properties:
-      affiliateID:
+      affiliate_id:
         type: string
       amount:
         type: number
       id:
         type: string
-      orderID:
+      order_id:
         type: string
     type: object
   db.CreateProductParams:
@@ -33,7 +33,9 @@ definitions:
     type: object
   db.CreateUserParams:
     properties:
-      affiliateID:
+      affiliate_id:
+        type: string
+      password:
         type: string
       username:
         type: string
@@ -51,13 +53,20 @@ definitions:
     type: object
   db.User:
     properties:
-      affiliateID:
+      affiliate_id:
         type: string
       balance:
         type: number
       id:
         type: string
+      password:
+        type: string
       username:
+        type: string
+    type: object
+  handlers.ErrorResponse:
+    properties:
+      error:
         type: string
     type: object
   handlers.OrderRequest:
@@ -102,7 +111,7 @@ definitions:
         type: integer
       data:
         items:
-          $ref: '#/definitions/db.User'
+          $ref: '#/definitions/handlers.Users'
         type: array
       page:
         type: integer
@@ -110,6 +119,17 @@ definitions:
         type: integer
       total_page:
         type: integer
+    type: object
+  handlers.Users:
+    properties:
+      affiliate_id:
+        type: string
+      balance:
+        type: number
+      id:
+        type: string
+      username:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -137,6 +157,12 @@ paths:
           description: Affiliate created successfully
           schema:
             $ref: '#/definitions/db.Affiliate'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new affiliate
       tags:
       - Affiliates
@@ -158,6 +184,12 @@ paths:
           description: Affiliate details
           schema:
             $ref: '#/definitions/db.Affiliate'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get affiliate by ID
       tags:
       - Affiliates
@@ -175,6 +207,12 @@ paths:
             items:
               $ref: '#/definitions/db.Affiliate'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List all affiliates
       tags:
       - Affiliates
@@ -196,6 +234,12 @@ paths:
           description: Commission details
           schema:
             $ref: '#/definitions/db.Commission'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get commission by ID
       tags:
       - Commissions
@@ -213,6 +257,12 @@ paths:
             items:
               $ref: '#/definitions/db.Commission'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List all commissions
       tags:
       - Commissions
@@ -235,6 +285,12 @@ paths:
           description: Product created successfully
           schema:
             $ref: '#/definitions/db.Product'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new product
       tags:
       - Products
@@ -256,6 +312,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/db.Product'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get product details by ID
       tags:
       - Products
@@ -273,6 +335,12 @@ paths:
             items:
               $ref: '#/definitions/db.Product'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List all products
       tags:
       - Products
@@ -280,7 +348,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user
+      description: register a new user
       parameters:
       - description: User details
         in: body
@@ -295,7 +363,7 @@ paths:
           description: User created successfully
           schema:
             $ref: '#/definitions/db.User'
-      summary: Create a new user
+      summary: register a new user
       tags:
       - Users
   /users/{id}:
@@ -316,6 +384,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/db.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get user details by ID
       tags:
       - Users
@@ -345,6 +419,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Add user balance
       tags:
       - Users
@@ -369,6 +449,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/handlers.ResponseUser'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List all users with pagination
       tags:
       - Users
@@ -398,6 +484,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Deduct user balance
       tags:
       - Users
@@ -420,6 +512,12 @@ paths:
           description: Order completed
           schema:
             $ref: '#/definitions/handlers.OrderResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: ordering a product and calculate commission
       tags:
       - User ordering a product

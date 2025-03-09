@@ -1,7 +1,6 @@
 package routes
 
 import (
-	// db "github.com/buranasakS/trading_application/db/sqlc"
 	"github.com/buranasakS/trading_application/handlers"
 	"github.com/buranasakS/trading_application/middleware"
 	"github.com/gin-gonic/gin"
@@ -9,35 +8,34 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRoutes(router *gin.Engine) {
+func SetupRoutes(router *gin.Engine, h *handlers.Handler) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// protected := router.Group("/", middleware.JwtMiddleware())
-
-	router.POST("/login", handlers.LoginUser)
-	router.POST("/register", handlers.RegisterUser)
+	router.POST("/login", h.LoginUserHandler)
+	router.POST("/register", h.RegisterUserHandler)
 
 	productRoutes := router.Group("/products")
 	productRoutes.Use(middleware.JwtMiddleware())
-	{
-		productRoutes.POST("/", handlers.CreateProductHandler)
-		productRoutes.GET("/list", handlers.ListProductsHandler)
-		productRoutes.GET("/:id", handlers.GetProductByIDHandler)
-	}
+    {
+        productRoutes.POST("", h.CreateProductHandler)
+        productRoutes.GET("/list", h.ListProductsHandler)
+        productRoutes.GET("/:id", h.GetProductDetailHandler)
+    }
 
-	affiliateRoutes := router.Group("/affiliates")
+	affiliateRoutes := router.Group("/affiliates") 
 	affiliateRoutes.Use(middleware.JwtMiddleware())
 	{
-		affiliateRoutes.POST("/", handlers.CreateAffiliateHandler)
-		affiliateRoutes.GET("/list", handlers.ListAffiliatesHandler)
-		affiliateRoutes.GET("/:id", handlers.GetAffiliateByIDHandler)
+		affiliateRoutes.POST("", h.CreateAffiliateHandler)
+		affiliateRoutes.GET("/list", h.ListAffiliatesHandler)
+		affiliateRoutes.GET("/:id", h.GetAffiliateDetailHandler)
 	}
 
 	commissionRoutes := router.Group("/commissions")
 	commissionRoutes.Use(middleware.JwtMiddleware())
 	{
-		commissionRoutes.GET("/list", handlers.ListCommissionsHandler)
-		commissionRoutes.GET("/:id", handlers.GetCommissionByIDHandler)
+		commissionRoutes.GET("/list", h.ListCommissionsHandler)
+		commissionRoutes.GET("/:id", h.GetCommissionDetailHandler)
 	}
 
 	userRoutes := router.Group("/users")
@@ -45,11 +43,11 @@ func SetupRoutes(router *gin.Engine) {
 	{
 		// userRoutes.POST("/login", handlers.LoginUser)
 		// userRoutes.POST("/register", handlers.RegisterUser)
-		userRoutes.GET("/all", handlers.ListUsersHandler)
-		userRoutes.GET("/:id", handlers.GetUserDetailByIDHandler)
-		userRoutes.PATCH("/deduct/balance/:id", handlers.DeductUserBalanceHandler)
-		userRoutes.PATCH("/add/balance/:id", handlers.AddUserBalanceHandler)
-		userRoutes.POST("/order", handlers.UserOrderProductHandler)
+		userRoutes.GET("/all", h.ListUsersHandler)
+		userRoutes.GET("/:id", h.GetUserDetailHandler)
+		userRoutes.PATCH("/deduct/balance/:id", h.DeductUserBalanceHandler)
+		userRoutes.PATCH("/add/balance/:id", h.AddUserBalanceHandler)
+		userRoutes.POST("/order", h.UserOrderProductHandler)
 	}
 
 }

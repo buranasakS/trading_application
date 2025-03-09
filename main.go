@@ -5,27 +5,39 @@ import (
 	"os"
 
 	"github.com/buranasakS/trading_application/config"
-	_ "github.com/buranasakS/trading_application/docs"
+	db "github.com/buranasakS/trading_application/db/sqlc"
+	"github.com/buranasakS/trading_application/handlers"
 	"github.com/buranasakS/trading_application/routes"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 // @title Trading Application API
 // @version 1.0
 // @description This is a Golang Application For Backend Candidate Test
-
 // @host localhost:8080
 // @BasePath /
 func main() {
 
-	db := config.ConnectDatabase()
-	defer config.CloseDatabase(db)
+	database := config.ConnectDatabase()
+	defer config.CloseDatabase(database)
 
-	router := gin.Default()
-	routes.SetupRoutes(router)
+	queries := db.New(database.DB)	
+	h := handlers.NewHandler(queries)
+
+	gin.SetMode(gin.DebugMode)
+	router := gin.New()
+	router.Use(gin.Recovery())
+
+	routes.SetupRoutes(router, h)
+	
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
 
 	port := os.Getenv("PORT")
-	err := router.Run(":" + port)
+	err = router.Run(":" + port)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

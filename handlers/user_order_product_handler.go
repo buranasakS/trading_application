@@ -29,12 +29,14 @@ type OrderResponse struct {
 // @Summary      ordering a product and calculate commission
 // @Description  ordering a product and calculate commission
 // @Tags         User ordering a product
+// @Security BearerAuth
 // @Accept       json
 // @Produce      json
 // @Param        request body    OrderRequest true "Order product detail"
 // @Success      201  {object}   OrderResponse  "Order completed"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Router       /users/order [post]
-func UserOrderProductHandler(c *gin.Context) {
+func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 	var req OrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
@@ -46,7 +48,6 @@ func UserOrderProductHandler(c *gin.Context) {
 		return
 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
 	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to start transaction"})
@@ -54,7 +55,7 @@ func UserOrderProductHandler(c *gin.Context) {
 	}
 	defer tx.Rollback(context.Background())
 
-	qtx := queries.WithTx(tx)
+	qtx := db.New(tx)
 
 	user, err := qtx.GetUserDetailByID(context.Background(), req.UserID)
 	if err != nil {
@@ -99,8 +100,9 @@ func UserOrderProductHandler(c *gin.Context) {
 
 	orderID := uuid.New()
 	if user.AffiliateID.Valid {
-		affililates := []db.Affiliate{}
+		affiliateLevel := 0
 		currentAffiliateID := user.AffiliateID
+		var previousCommissionRate float64 = 0 
 
 		for currentAffiliateID.Valid {
 			affiliate, err := qtx.GetAffiliateByID(context.Background(), currentAffiliateID)
@@ -108,57 +110,52 @@ func UserOrderProductHandler(c *gin.Context) {
 				break
 			}
 
-			affililates = append(affililates, affiliate)
-			currentAffiliateID = affiliate.MasterAffiliate
-		}
-
-		if len(affililates) == 0 {
-			return
-		}
-
-		commissionRates := []float64{0.05, 0.10, 0.15, 0.20}
-		commissionLevel := 0
-		if len(affililates) <= len(commissionRates) {
-			commissionLevel = len(commissionRates) - len(affililates)
-		}
-
-		for i := 0; i < len(affililates); i++ {
-			var commissionAmount float64
-			level := commissionLevel + i
-
-			if level >= len(commissionRates) {
-				level = len(commissionRates) - 1
-				commissionAmount = (commissionRates[level] - commissionRates[len(commissionRates)-1]) * totalPrice
-			} else {
-				if i == 0 {
-					commissionAmount = commissionRates[level] * totalPrice
-				} else {
-					commissionAmount = (commissionRates[level] - commissionRates[level-1]) * totalPrice
+			commissionRate := 0.0
+			if affiliateLevel == 0 {
+				commissionRate = 0.20
+			} else if affiliateLevel == 1 {
+				commissionRate = 0.15
+			} else if affiliateLevel == 2 {
+				commissionRate = 0.10
+			} else if affiliateLevel == 3 {
+				commissionRate = 0.05
+			} else if affiliateLevel > 3 {
+				commissionRate = previousCommissionRate - 0.01
+				if commissionRate < 0 {
+					commissionRate = 0
 				}
 			}
 
-			if commissionAmount <= 0 {
-				continue
+			if commissionRate > 0 {
+				var commissionAmount float64
+				if affiliateLevel <= 3 {
+					commissionAmount = commissionRate * totalPrice
+				} else {
+					commissionAmount = (previousCommissionRate - commissionRate) * totalPrice
+				}
+				_, err = qtx.CreateCommission(context.Background(), db.CreateCommissionParams{
+					OrderID:     pgtype.UUID{Bytes: orderID, Valid: true},
+					AffiliateID: affiliate.ID,
+					Amount:      commissionAmount,
+				})
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create commission"})
+					return
+				}
+
+				err = qtx.AddAffiliateBalance(context.Background(), db.AddAffiliateBalanceParams{
+					ID:      affiliate.ID,
+					Balance: commissionAmount,
+				})
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add affiliate balance"})
+					return
+				}
 			}
 
-			_, err := qtx.CreateCommission(context.Background(), db.CreateCommissionParams{
-				OrderID:     pgtype.UUID{Bytes: orderID, Valid: true},
-				AffiliateID: affililates[i].ID,
-				Amount:      commissionAmount,
-			})
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create commission"})
-				return
-			}
-
-			err = qtx.AddAffiliateBalance(context.Background(), db.AddAffiliateBalanceParams{
-				ID:      affililates[i].ID,
-				Balance: commissionAmount,
-			})
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add affiliate balance"})
-				return
-			}
+			previousCommissionRate = commissionRate
+			affiliateLevel++
+			currentAffiliateID = affiliate.MasterAffiliate
 		}
 	}
 
@@ -171,7 +168,7 @@ func UserOrderProductHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"status":     "success",
 		"message":    "Purchase completed",
-		"order_id":   orderID,
+		"order_id":   orderID.String(),
 		"total_cost": totalPrice,
 	})
 }

@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -29,4 +30,25 @@ func (q *Queries) WithTx(tx pgx.Tx) *Queries {
 	return &Queries{
 		db: tx,
 	}
+}
+
+func (q *Queries) BeginTx(ctx context.Context, opts pgx.TxOptions) (pgx.Tx, error) {
+	if db, ok := q.db.(*pgx.Conn); ok {
+		return db.BeginTx(ctx, opts)
+	}
+	return nil, fmt.Errorf("BeginTx not supported")
+}
+
+func (q *Queries) Commit(ctx context.Context) error {
+	if tx, ok := q.db.(pgx.Tx); ok {
+		return tx.Commit(ctx)
+	}
+	return fmt.Errorf("Commit not supported")
+}
+
+func (q *Queries) Rollback(ctx context.Context) error {
+	if tx, ok := q.db.(pgx.Tx); ok {
+		return tx.Rollback(ctx)
+	}
+	return fmt.Errorf("Rollback not supported")
 }

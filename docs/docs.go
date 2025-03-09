@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/affiliates": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new affiliate",
                 "consumes": [
                     "application/json"
@@ -45,12 +50,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/db.Affiliate"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/affiliates/list": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List all affiliates",
                 "consumes": [
                     "application/json"
@@ -71,12 +87,23 @@ const docTemplate = `{
                                 "$ref": "#/definitions/db.Affiliate"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/affiliates/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get affiliate by ID",
                 "consumes": [
                     "application/json"
@@ -103,12 +130,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/db.Affiliate"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/commissions/list": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List all commissions",
                 "consumes": [
                     "application/json"
@@ -129,12 +167,23 @@ const docTemplate = `{
                                 "$ref": "#/definitions/db.Commission"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/commissions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get commission by ID",
                 "consumes": [
                     "application/json"
@@ -161,12 +210,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/db.Commission"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/products": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new product details",
                 "consumes": [
                     "application/json"
@@ -195,12 +255,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/db.Product"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/products/list": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List all products",
                 "consumes": [
                     "application/json"
@@ -221,12 +292,23 @@ const docTemplate = `{
                                 "$ref": "#/definitions/db.Product"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/products/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve product details by their unique ID",
                 "consumes": [
                     "application/json"
@@ -253,13 +335,19 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/db.Product"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users": {
             "post": {
-                "description": "Create a new user",
+                "description": "register a new user",
                 "consumes": [
                     "application/json"
                 ],
@@ -269,7 +357,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Create a new user",
+                "summary": "register a new user",
                 "parameters": [
                     {
                         "description": "User details",
@@ -293,6 +381,11 @@ const docTemplate = `{
         },
         "/users/add/balance/{id}": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "add balance to user account",
                 "consumes": [
                     "application/json"
@@ -331,12 +424,23 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/all": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Fetch a paginated list of users from the database",
                 "consumes": [
                     "application/json"
@@ -368,12 +472,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handlers.ResponseUser"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/deduct/balance/{id}": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "deduct balance from user account",
                 "consumes": [
                     "application/json"
@@ -412,12 +527,23 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/order": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "ordering a product and calculate commission",
                 "consumes": [
                     "application/json"
@@ -446,12 +572,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handlers.OrderResponse"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve user details by their unique ID",
                 "consumes": [
                     "application/json"
@@ -478,6 +615,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/db.User"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -493,7 +636,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "masterAffiliate": {
+                "master_affiliate": {
                     "type": "string"
                 },
                 "name": {
@@ -504,7 +647,7 @@ const docTemplate = `{
         "db.Commission": {
             "type": "object",
             "properties": {
-                "affiliateID": {
+                "affiliate_id": {
                     "type": "string"
                 },
                 "amount": {
@@ -513,7 +656,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "orderID": {
+                "order_id": {
                     "type": "string"
                 }
             }
@@ -535,7 +678,10 @@ const docTemplate = `{
         "db.CreateUserParams": {
             "type": "object",
             "properties": {
-                "affiliateID": {
+                "affiliate_id": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "username": {
@@ -563,7 +709,7 @@ const docTemplate = `{
         "db.User": {
             "type": "object",
             "properties": {
-                "affiliateID": {
+                "affiliate_id": {
                     "type": "string"
                 },
                 "balance": {
@@ -572,7 +718,18 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
                     "type": "string"
                 }
             }
@@ -642,7 +799,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/db.User"
+                        "$ref": "#/definitions/handlers.Users"
                     }
                 },
                 "page": {
@@ -653,6 +810,23 @@ const docTemplate = `{
                 },
                 "total_page": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.Users": {
+            "type": "object",
+            "properties": {
+                "affiliate_id": {
+                    "type": "string"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

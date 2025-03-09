@@ -11,6 +11,11 @@
     "paths": {
         "/affiliates": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new affiliate",
                 "consumes": [
                     "application/json"
@@ -39,12 +44,23 @@
                         "schema": {
                             "$ref": "#/definitions/db.Affiliate"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/affiliates/list": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List all affiliates",
                 "consumes": [
                     "application/json"
@@ -65,12 +81,23 @@
                                 "$ref": "#/definitions/db.Affiliate"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/affiliates/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get affiliate by ID",
                 "consumes": [
                     "application/json"
@@ -97,12 +124,23 @@
                         "schema": {
                             "$ref": "#/definitions/db.Affiliate"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/commissions/list": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List all commissions",
                 "consumes": [
                     "application/json"
@@ -123,12 +161,23 @@
                                 "$ref": "#/definitions/db.Commission"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/commissions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get commission by ID",
                 "consumes": [
                     "application/json"
@@ -155,12 +204,23 @@
                         "schema": {
                             "$ref": "#/definitions/db.Commission"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/products": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new product details",
                 "consumes": [
                     "application/json"
@@ -189,12 +249,23 @@
                         "schema": {
                             "$ref": "#/definitions/db.Product"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/products/list": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "List all products",
                 "consumes": [
                     "application/json"
@@ -215,12 +286,23 @@
                                 "$ref": "#/definitions/db.Product"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/products/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve product details by their unique ID",
                 "consumes": [
                     "application/json"
@@ -247,13 +329,19 @@
                         "schema": {
                             "$ref": "#/definitions/db.Product"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users": {
             "post": {
-                "description": "Create a new user",
+                "description": "register a new user",
                 "consumes": [
                     "application/json"
                 ],
@@ -263,7 +351,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Create a new user",
+                "summary": "register a new user",
                 "parameters": [
                     {
                         "description": "User details",
@@ -287,6 +375,11 @@
         },
         "/users/add/balance/{id}": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "add balance to user account",
                 "consumes": [
                     "application/json"
@@ -325,12 +418,23 @@
                                 "type": "string"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/all": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Fetch a paginated list of users from the database",
                 "consumes": [
                     "application/json"
@@ -362,12 +466,23 @@
                         "schema": {
                             "$ref": "#/definitions/handlers.ResponseUser"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/deduct/balance/{id}": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "deduct balance from user account",
                 "consumes": [
                     "application/json"
@@ -406,12 +521,23 @@
                                 "type": "string"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/order": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "ordering a product and calculate commission",
                 "consumes": [
                     "application/json"
@@ -440,12 +566,23 @@
                         "schema": {
                             "$ref": "#/definitions/handlers.OrderResponse"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve user details by their unique ID",
                 "consumes": [
                     "application/json"
@@ -472,6 +609,12 @@
                         "schema": {
                             "$ref": "#/definitions/db.User"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -487,7 +630,7 @@
                 "id": {
                     "type": "string"
                 },
-                "masterAffiliate": {
+                "master_affiliate": {
                     "type": "string"
                 },
                 "name": {
@@ -498,7 +641,7 @@
         "db.Commission": {
             "type": "object",
             "properties": {
-                "affiliateID": {
+                "affiliate_id": {
                     "type": "string"
                 },
                 "amount": {
@@ -507,7 +650,7 @@
                 "id": {
                     "type": "string"
                 },
-                "orderID": {
+                "order_id": {
                     "type": "string"
                 }
             }
@@ -529,7 +672,10 @@
         "db.CreateUserParams": {
             "type": "object",
             "properties": {
-                "affiliateID": {
+                "affiliate_id": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "username": {
@@ -557,7 +703,7 @@
         "db.User": {
             "type": "object",
             "properties": {
-                "affiliateID": {
+                "affiliate_id": {
                     "type": "string"
                 },
                 "balance": {
@@ -566,7 +712,18 @@
                 "id": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
                     "type": "string"
                 }
             }
@@ -636,7 +793,7 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/db.User"
+                        "$ref": "#/definitions/handlers.Users"
                     }
                 },
                 "page": {
@@ -647,6 +804,23 @@
                 },
                 "total_page": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.Users": {
+            "type": "object",
+            "properties": {
+                "affiliate_id": {
+                    "type": "string"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

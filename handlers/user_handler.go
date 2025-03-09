@@ -9,6 +9,7 @@ import (
 
 	"github.com/buranasakS/trading_application/config"
 	db "github.com/buranasakS/trading_application/db/sqlc"
+	"github.com/buranasakS/trading_application/helpers"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
@@ -16,6 +17,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type RequestUserLogin struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type RequestUserRegister struct {
+	Username    string      `json:"username" binding:"required"`
+	Password    string      `json:"password" binding:"required"`
+	AffiliateID pgtype.UUID `json:"affiliate_id" binding:"required"`
+}
 type ResponseUser struct {
 	Page       int32   `json:"page"`
 	TotalPage  int32   `json:"total_page"`
@@ -34,27 +45,28 @@ type RequestAmount struct {
 	Amount float64 `json:"amount" binding:"required"`
 }
 
-func LoginUser(c *gin.Context) {
-	var req struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
+func (h *Handler) LoginUserHandler(c *gin.Context) {
+	var req RequestUserLogin
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
-	user, err := queries.GetUserByUsernameForLogin(context.Background(), req.Username)
+	user, err := h.db.GetUserByUsernameForLogin(context.Background(), req.Username)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"Error": "Invalid username or password"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username or password"})
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Invalid username or password"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
+		return
+	}
+
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing token key"})
 		return
 	}
 
@@ -65,7 +77,7 @@ func LoginUser(c *gin.Context) {
 		"username": user.Username,
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	tokenString, err := token.SignedString([]byte(os.Getenv(secretKey)))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to generate token"})
 		return
@@ -76,32 +88,45 @@ func LoginUser(c *gin.Context) {
 	})
 }
 
-func RegisterUser(c *gin.Context) {
-	var req struct {
-		Username    string      `json:"username" binding:"required"`
-		Password    string      `json:"password" binding:"required"`
-		AffiliateID pgtype.UUID `json:"affiliate_id" binding:"required"`
-	}
-
+// RegisterUserHandler godoc
+// @Summary      register a new user
+// @Description  register a new user
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body      db.CreateUserParams true "User details"
+// @Success      201  {object}  db.User "User created successfully"
+// @Router       /users [post]
+func (h *Handler) RegisterUserHandler(c *gin.Context) {
+	var req RequestUserRegister
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if req.Username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing username"})
+		return
+	}
+
+	if req.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing password"})
+		return
+	}
+
+	hashedPassword, err := helpers.HashedPassword(req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
-	user, err := queries.CreateUser(context.Background(), db.CreateUserParams{
+	user, err := h.db.CreateUser(context.Background(), db.CreateUserParams{
 		Username:    req.Username,
-		Password:    string(hashedPassword),
+		Password:    hashedPassword,
 		AffiliateID: req.AffiliateID,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
@@ -113,62 +138,31 @@ func RegisterUser(c *gin.Context) {
 	})
 }
 
-// CreateUserHandler godoc
-// @Summary      Create a new user
-// @Description  Create a new user
-// @Tags         Users
-// @Accept       json
-// @Produce      json
-// @Param        request body      db.CreateUserParams true "User details"
-// @Success      201  {object}  db.User "User created successfully"
-// @Router       /users [post]
-// func CreateUserHandler(c *gin.Context) {
-// 	var req struct {
-// 		Username    string      `json:"username" binding:"required"`
-// 		AffiliateID pgtype.UUID `json:"affiliate_id" binding:"required"`
-// 	}
-
-// 	if err := c.ShouldBindJSON(&req); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-// 		return
-// 	}
-
-// 	queries := db.New(config.ConnectDatabase().DB)
-// 	user, err := queries.CreateUser(context.Background(), db.CreateUserParams{
-// 		Username:    req.Username,
-// 		AffiliateID: req.AffiliateID,
-// 	})
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create user"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusCreated, user)
-// }
-
 // ListUsersHandler godoc
 // @Summary      List all users with pagination
 // @Description  Fetch a paginated list of users from the database
 // @Tags         Users
+// @Security BearerAuth
 // @Accept       json
 // @Produce      json
 // @Param        limit  query   int  false  "Number of users per page (default 10)"
 // @Param        page   query   int  false  "Page number (default 1)"
 // @Success      200  {object}  ResponseUser
+// @Failure 401 {object} handlers.ErrorResponse
 // @Router       /users/all [get]
-func ListUsersHandler(c *gin.Context) {
+func (h *Handler) ListUsersHandler(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	pageStr := c.DefaultQuery("page", "1")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid limit value. Must be a positive integer."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit value. Must be a positive integer."})
 		return
 	}
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid page value. Must be a positive integer."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page value. Must be a positive integer."})
 		return
 	}
 
@@ -181,13 +175,12 @@ func ListUsersHandler(c *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	queries := db.New(config.ConnectDatabase().DB)
-	userRows, err := queries.ListUsers(context.Background(), db.ListUsersParams{
+	userRows, err := h.db.ListUsers(context.Background(), db.ListUsersParams{
 		Limit:  int32(limit),
 		Offset: int32(offset),
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch users"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
 	}
 
@@ -217,77 +210,78 @@ func ListUsersHandler(c *gin.Context) {
 // @Summary      Get user details by ID
 // @Description  Retrieve user details by their unique ID
 // @Tags         Users
+// @Security BearerAuth
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string  true  "User ID (UUID)"
 // @Success      200  {object}  db.User
+// @Failure 401 {object} handlers.ErrorResponse
 // @Router       /users/{id} [get]
-func GetUserDetailByIDHandler(c *gin.Context) {
+func (h *Handler) GetUserDetailHandler(c *gin.Context) {
 	var userId pgtype.UUID
 	if err := userId.Scan(c.Param("id")); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid User ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
 		return
 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
-	user, err := queries.GetUserDetailByID(context.Background(), userId)
+	user, err := h.db.GetUserDetailByID(context.Background(), userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, user)
 }
 
-
 // DeductUserBalanceHandler godoc
 // @Summary Deduct user balance
 // @Description deduct balance from user account
 // @Tags Users
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
 // @Param request body RequestAmount true "Amount to deduct"
 // @Success      200  {object}  map[string]string "Balance deducted successfully"
+// @Failure 401 {object} handlers.ErrorResponse
 // @Router /users/deduct/balance/{id} [patch]
-func DeductUserBalanceHandler(c *gin.Context) {
+func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 	var userId pgtype.UUID
 	if err := userId.Scan(c.Param("id")); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid User ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
 		return
 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
-	exist, err := queries.CheckUserExists(context.Background(), userId)
+	user, err := h.db.GetUserDetailByID(context.Background(), userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to check user"})
-		return
-	}
-	if !exist {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
 		return
 	}
 
 	var req RequestAmount
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request body, 'amount' should be a positive number"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body, 'amount' should be a positive number"})
 		return
 	}
 
 	if req.Amount <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Amount must be more than 0"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Amount must be more than 0"})
 		return
 	}
 
 	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
 	}
 
-	defer tx.Rollback(context.Background())
-	qtx := queries.WithTx(tx)
+	defer func() {
+		if err != nil {
+			tx.Rollback(context.Background())
+		}
+	}()
 
+	qtx := db.New(tx)
 	result, err := qtx.DeductUserBalance(context.Background(), db.DeductUserBalanceParams{
 		Balance: req.Amount,
 		ID:      userId,
@@ -298,21 +292,16 @@ func DeductUserBalanceHandler(c *gin.Context) {
 	}
 
 	if result == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Insufficient balance"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Insufficient balance"})
 		return
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to commit transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
 	}
 
-	user, err := queries.UserBalance(context.Background(), userId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch user balance"})
-		return
-	}
 
 	c.JSON(http.StatusOK, user)
 }
@@ -321,69 +310,64 @@ func DeductUserBalanceHandler(c *gin.Context) {
 // @Summary Add user balance
 // @Description add balance to user account
 // @Tags Users
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
 // @Param request body RequestAmount true "Amount to add"
 // @Success      200  {object}  map[string]string "Balance added successfully"
+// @Failure 401 {object} handlers.ErrorResponse
 // @Router /users/add/balance/{id} [patch]
-func AddUserBalanceHandler(c *gin.Context) {
+func (h *Handler) AddUserBalanceHandler(c *gin.Context) {
 	var userId pgtype.UUID
 	if err := userId.Scan(c.Param("id")); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid User ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
 		return
 	}
 
-	queries := db.New(config.ConnectDatabase().DB)
-	exist, err := queries.CheckUserExists(context.Background(), userId)
+	user, err := h.db.GetUserDetailByID(context.Background(), userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to check user"})
-		return
-	}
-	if !exist {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
 		return
 	}
 
 	var req RequestAmount
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request body, 'amount' should be a positive number"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body, 'amount' should be a positive number"})
 		return
 	}
 
 	if req.Amount <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Amount must be more than 0"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Amount must be more than 0"})
 		return
 	}
 
 	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback(context.Background())
+
+	qtx := db.New(tx)
+
+	result, err := qtx.AddUserBalance(context.Background(), db.AddUserBalanceParams{
+		Balance: req.Amount,
+		ID:      userId,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update balance"})
 		return
 	}
 
-	defer tx.Rollback(context.Background())
-
-	qtx := queries.WithTx(tx)
-
-	err = qtx.AddUserBalance(context.Background(), db.AddUserBalanceParams{
-		Balance: req.Amount,
-		ID:      userId})
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update balance"})
+	if result == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Insufficient balance"})
 		return
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to commit transaction"})
-		return
-	}
-
-	user, err := queries.UserBalance(context.Background(), userId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch user balance"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
 	}
 
