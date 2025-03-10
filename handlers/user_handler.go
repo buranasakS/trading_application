@@ -269,7 +269,7 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 		return
 	}
 
-	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err :=config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
@@ -281,7 +281,8 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 		}
 	}()
 
-	qtx := db.New(tx)
+	qtx := h.db.(*db.Queries).WithTx(tx)
+
 	result, err := qtx.DeductUserBalance(context.Background(), db.DeductUserBalanceParams{
 		Balance: req.Amount,
 		ID:      userId,
@@ -349,7 +350,7 @@ func (h *Handler) AddUserBalanceHandler(c *gin.Context) {
 	}
 	defer tx.Rollback(context.Background())
 
-	qtx := db.New(tx)
+	qtx := h.db.(*db.Queries).WithTx(tx)
 
 	result, err := qtx.AddUserBalance(context.Background(), db.AddUserBalanceParams{
 		Balance: req.Amount,

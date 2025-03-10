@@ -10,7 +10,6 @@ import (
 
 	db "github.com/buranasakS/trading_application/db/sqlc"
 	gomock "github.com/golang/mock/gomock"
-	pgx "github.com/jackc/pgx/v5"
 	pgtype "github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -66,21 +65,6 @@ func (mr *MockQuerierMockRecorder) AddUserBalance(ctx, arg interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserBalance", reflect.TypeOf((*MockQuerier)(nil).AddUserBalance), ctx, arg)
 }
 
-// BeginTx mocks base method.
-func (m *MockQuerier) BeginTx(ctx context.Context, options pgx.TxOptions) (pgx.Tx, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BeginTx", ctx, options)
-	ret0, _ := ret[0].(pgx.Tx)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// BeginTx indicates an expected call of BeginTx.
-func (mr *MockQuerierMockRecorder) BeginTx(ctx, options interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockQuerier)(nil).BeginTx), ctx, options)
-}
-
 // CheckUserExists mocks base method.
 func (m *MockQuerier) CheckUserExists(ctx context.Context, id pgtype.UUID) (bool, error) {
 	m.ctrl.T.Helper()
@@ -94,20 +78,6 @@ func (m *MockQuerier) CheckUserExists(ctx context.Context, id pgtype.UUID) (bool
 func (mr *MockQuerierMockRecorder) CheckUserExists(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUserExists", reflect.TypeOf((*MockQuerier)(nil).CheckUserExists), ctx, id)
-}
-
-// Commit mocks base method.
-func (m *MockQuerier) Commit(ctx context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Commit", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Commit indicates an expected call of Commit.
-func (mr *MockQuerierMockRecorder) Commit(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockQuerier)(nil).Commit), ctx)
 }
 
 // CountUsers mocks base method.
@@ -363,20 +333,6 @@ func (m *MockQuerier) ListUsers(ctx context.Context, arg db.ListUsersParams) ([]
 func (mr *MockQuerierMockRecorder) ListUsers(ctx, arg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockQuerier)(nil).ListUsers), ctx, arg)
-}
-
-// Rollback mocks base method.
-func (m *MockQuerier) Rollback(ctx context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Rollback", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Rollback indicates an expected call of Rollback.
-func (mr *MockQuerierMockRecorder) Rollback(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockQuerier)(nil).Rollback), ctx)
 }
 
 // UserBalance mocks base method.

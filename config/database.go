@@ -9,10 +9,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type DB interface {
-	BeginTx(ctx context.Context, options pgx.TxOptions) (pgx.Tx, error)
-}
-
 type PgDatabase struct {
 	DB *pgx.Conn
 }

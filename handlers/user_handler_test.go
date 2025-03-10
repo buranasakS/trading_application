@@ -578,14 +578,12 @@ func TestDeductUserBalanceHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDB := mockdb.NewMockQuerier(ctrl)
 
-			// ตรวจสอบว่า UUID ถูกต้องก่อนตั้งค่าคาดหวัง
 			if _, err := uuid.Parse(tt.userId); err == nil {
 				mockDB.EXPECT().
 					GetUserDetailByID(gomock.Any(), gomock.Any()).
 					Return(tt.mockUserDetail, tt.mockUserErr).
 					Times(1)
 
-				// ตั้งค่าคาดหวัง DeductUserBalance เฉพาะเมื่อผ่านเงื่อนไขทั้งหมด
 				if tt.mockUserErr == nil && tt.reqBody != "invalid json" {
 					if amount, ok := tt.reqBody.(RequestAmount); ok && amount.Amount > 0 {
 						mockDB.EXPECT().
@@ -730,14 +728,12 @@ func TestAddUserBalanceHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDB := mockdb.NewMockQuerier(ctrl)
 
-			// ตรวจสอบว่า UUID ถูกต้องก่อนตั้งค่าคาดหวัง
 			if _, err := uuid.Parse(tt.userId); err == nil {
 				mockDB.EXPECT().
 					GetUserDetailByID(gomock.Any(), gomock.Any()).
 					Return(tt.mockUserDetail, tt.mockUserErr).
 					Times(1)
 
-				// ตั้งค่าคาดหวัง DeductUserBalance เฉพาะเมื่อผ่านเงื่อนไขทั้งหมด
 				if tt.mockUserErr == nil && tt.reqBody != "invalid json" {
 					if amount, ok := tt.reqBody.(RequestAmount); ok && amount.Amount > 0 {
 						mockDB.EXPECT().
