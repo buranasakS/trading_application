@@ -4,11 +4,14 @@ import (
 	"github.com/buranasakS/trading_application/handlers"
 	"github.com/buranasakS/trading_application/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	"github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRoutes(router *gin.Engine, h *handlers.Handler) {
+	router.Use(cors.Default())
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// protected := router.Group("/", middleware.JwtMiddleware())

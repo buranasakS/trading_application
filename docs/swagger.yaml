@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   db.Affiliate:
     properties:
@@ -521,4 +520,9 @@ paths:
       summary: ordering a product and calculate commission
       tags:
       - User ordering a product
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

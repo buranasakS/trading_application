@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
@@ -19,6 +20,7 @@ require (
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gin-contrib/cors v1.7.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect

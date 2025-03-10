@@ -18,6 +18,9 @@ import (
 // @version 1.0
 // @description This is a Golang Application For Backend Candidate Test
 // @host localhost:8080
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 // @BasePath /
 func main() {
 

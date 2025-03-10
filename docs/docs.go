@@ -830,6 +830,13 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -837,7 +844,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Trading Application API",
 	Description:      "This is a Golang Application For Backend Candidate Test",
