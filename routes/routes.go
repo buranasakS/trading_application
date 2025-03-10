@@ -41,8 +41,6 @@ func SetupRoutes(router *gin.Engine, h *handlers.Handler) {
 	userRoutes := router.Group("/users")
 	// userRoutes.Use(middleware.JwtMiddleware())
 	{
-		// userRoutes.POST("/login", handlers.LoginUser)
-		// userRoutes.POST("/register", handlers.RegisterUser)
 		userRoutes.GET("/all", h.ListUsersHandler)
 		userRoutes.GET("/:id", h.GetUserDetailHandler)
 		userRoutes.PATCH("/deduct/balance/:id", h.DeductUserBalanceHandler)

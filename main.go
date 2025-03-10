@@ -10,6 +10,8 @@ import (
 	"github.com/buranasakS/trading_application/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	_ "github.com/buranasakS/trading_application/docs" 
+
 )
 
 // @title Trading Application API
@@ -26,7 +28,7 @@ func main() {
 	h := handlers.NewHandler(queries)
 
 	gin.SetMode(gin.DebugMode)
-	router := gin.New()
+	router := gin.Default()
 	router.Use(gin.Recovery())
 
 	routes.SetupRoutes(router, h)
