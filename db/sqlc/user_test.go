@@ -14,8 +14,11 @@ func createRandomUser(t *testing.T) User {
 	affiliate := createRandomAffiliate(t)
 	hashPassword, err := helpers.HashedPassword(uuid.New().String())
 	require.NoError(t, err)
+	randomUsername, err := helpers.GenerateRandomString(10)
+	require.NoError(t, err)
+
 	arg := CreateUserParams{
-		Username:    uuid.New().String(),
+		Username:    randomUsername,
 		Password:    hashPassword,
 		AffiliateID: affiliate.ID,
 	}
@@ -57,7 +60,6 @@ func TestAddUserBalance(t *testing.T) {
 func TestDeductUserBalance(t *testing.T) {
 	user := createRandomUser(t)
 
-	// Add initial balance
 	initialBalance := float64(200)
 	addBalanceArg := AddUserBalanceParams{
 		ID:      user.ID,
@@ -79,7 +81,6 @@ func TestDeductUserBalance(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, initialBalance-deductAmount, userBalance.Balance)
 
-	// Test insufficient balance
 	arg = DeductUserBalanceParams{
 		ID:      user.ID,
 		Balance: initialBalance,

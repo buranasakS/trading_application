@@ -73,11 +73,11 @@ func (h *Handler) LoginUserHandler(c *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":      user.ID,
 		"exp":      time.Now().Add(time.Hour * 72).Unix(),
-		"iat":      time.Now().Unix(),
+		"IssuedAt": time.Now().Unix(),
 		"username": user.Username,
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv(secretKey)))
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to generate token"})
 		return
@@ -254,7 +254,7 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 
 	user, err := h.db.GetUserDetailByID(context.Background(), userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -269,19 +269,18 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 		return
 	}
 
-	tx, err :=config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
 	}
 
-	defer func() {
-		if err != nil {
-			tx.Rollback(context.Background())
-		}
-	}()
+	defer tx.Rollback(context.Background())
 
-	qtx := h.db.(*db.Queries).WithTx(tx)
+	var qtx db.Querier = h.db
+	if queriesDB, ok := h.db.(*db.Queries); ok {
+		qtx = queriesDB.WithTx(tx)
+	}
 
 	result, err := qtx.DeductUserBalance(context.Background(), db.DeductUserBalanceParams{
 		Balance: req.Amount,
@@ -302,7 +301,6 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
 	}
-
 
 	c.JSON(http.StatusOK, user)
 }
@@ -348,9 +346,13 @@ func (h *Handler) AddUserBalanceHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
 	}
+
 	defer tx.Rollback(context.Background())
 
-	qtx := h.db.(*db.Queries).WithTx(tx)
+	var qtx db.Querier = h.db
+	if queriesDB, ok := h.db.(*db.Queries); ok {
+		qtx = queriesDB.WithTx(tx)
+	}
 
 	result, err := qtx.AddUserBalance(context.Background(), db.AddUserBalanceParams{
 		Balance: req.Amount,

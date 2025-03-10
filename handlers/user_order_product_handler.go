@@ -39,44 +39,47 @@ type OrderResponse struct {
 func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 	var req OrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if req.Quantity < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Quantity must be more than 0"})
+	if req.Quantity <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Quantity must be more than 0"})
 		return
 	}
 
 	tx, err := config.ConnectDatabase().DB.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
 		return
 	}
 	defer tx.Rollback(context.Background())
 
-	qtx := db.New(tx)
+	var qtx db.Querier = h.db
+	if queriesDB, ok := h.db.(*db.Queries); ok {
+		qtx = queriesDB.WithTx(tx)
+	}
 
-	user, err := qtx.GetUserDetailByID(context.Background(), req.UserID)
+	user, err := h.db.GetUserDetailByID(context.Background(), req.UserID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return
 	}
 
-	product, err := qtx.GetProductByID(context.Background(), req.ProductID)
+	product, err := h.db.GetProductByID(context.Background(), req.ProductID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Product not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Product not found"})
+		return
+	}
+
+	if product.Quantity < int32(req.Quantity) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not enough product in stock"})
 		return
 	}
 
 	totalPrice := product.Price * float64(req.Quantity)
 	if user.Balance < totalPrice {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Not enough balance"})
-		return
-	}
-
-	if product.Quantity < int32(req.Quantity) {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Not enough product in stock"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not enough balance ถถถ"})
 		return
 	}
 
@@ -85,7 +88,7 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 		ID:      req.UserID,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to deduct balance"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to deduct balance"})
 		return
 	}
 
@@ -94,32 +97,34 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 		ID:       req.ProductID,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to deduct product quantity"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to deduct product quantity"})
 		return
 	}
 
 	orderID := uuid.New()
+
 	if user.AffiliateID.Valid {
-		affiliateLevel := 0
+		affiliateLevel := 1
 		currentAffiliateID := user.AffiliateID
-		var previousCommissionRate float64 = 0 
+		var previousCommissionRate float64 = 0
 
 		for currentAffiliateID.Valid {
-			affiliate, err := qtx.GetAffiliateByID(context.Background(), currentAffiliateID)
+			affiliate, err := h.db.GetAffiliateByID(context.Background(), currentAffiliateID)
 			if err != nil || !affiliate.ID.Valid {
 				break
 			}
 
 			commissionRate := 0.0
-			if affiliateLevel == 0 {
+
+			if affiliateLevel == 1 {
 				commissionRate = 0.20
-			} else if affiliateLevel == 1 {
-				commissionRate = 0.15
 			} else if affiliateLevel == 2 {
-				commissionRate = 0.10
+				commissionRate = 0.15
 			} else if affiliateLevel == 3 {
+				commissionRate = 0.10
+			} else if affiliateLevel == 4 {
 				commissionRate = 0.05
-			} else if affiliateLevel > 3 {
+			} else if affiliateLevel > 4 {
 				commissionRate = previousCommissionRate - 0.01
 				if commissionRate < 0 {
 					commissionRate = 0
@@ -139,7 +144,7 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 					Amount:      commissionAmount,
 				})
 				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create commission"})
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to created commission"})
 					return
 				}
 

@@ -38,9 +38,6 @@ func TestLoginUserHandler(t *testing.T) {
 	hashPassword, errHash := helpers.HashedPassword("password123")
 	require.NoError(t, errHash)
 
-	// wrongHashPassword, errHashPass := helpers.HashedPassword("wrongpassword")
-	// require.NoError(t, errHashPass)
-
 	tests := []struct {
 		name           string
 		reqBody        interface{}
@@ -527,7 +524,7 @@ func TestDeductUserBalanceHandler(t *testing.T) {
 				Amount: 100.0,
 			},
 			mockUserErr:    sql.ErrNoRows,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusBadRequest,
 			expectedBody:   gin.H{"error": "User not found"},
 		},
 		{
@@ -641,8 +638,8 @@ func TestAddUserBalanceHandler(t *testing.T) {
 		reqBody        interface{}
 		mockUserDetail db.GetUserDetailByIDRow
 		mockUserErr    error
-		mockDeductErr  error
-		mockDeductRows int64
+		mockAddErr     error
+		mockAddRows    int64
 		expectedStatus int
 		expectedBody   interface{}
 	}{
@@ -657,9 +654,9 @@ func TestAddUserBalanceHandler(t *testing.T) {
 				Username: "testuser",
 				Balance:  1000.0,
 			},
-			mockUserErr:    nil,
-			mockDeductErr:  nil,
-			mockDeductRows: 1,
+			mockUserErr:   nil,
+			mockAddErr:    nil,
+			mockAddRows:   1,
 			expectedStatus: http.StatusOK,
 			expectedBody:   nil,
 		},
@@ -676,7 +673,7 @@ func TestAddUserBalanceHandler(t *testing.T) {
 			reqBody: RequestAmount{
 				Amount: 100.0,
 			},
-			mockUserErr:    sql.ErrNoRows,
+			mockUserErr:   sql.ErrNoRows,
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   gin.H{"error": "User not found"},
 		},
@@ -692,8 +689,8 @@ func TestAddUserBalanceHandler(t *testing.T) {
 				Balance:  500.0,
 			},
 			mockUserErr:    nil,
-			mockDeductErr:  nil,
-			mockDeductRows: 0,
+			mockAddErr:     nil,
+			mockAddRows:    0,
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   gin.H{"error": "Insufficient balance"},
 		},
@@ -737,11 +734,11 @@ func TestAddUserBalanceHandler(t *testing.T) {
 				if tt.mockUserErr == nil && tt.reqBody != "invalid json" {
 					if amount, ok := tt.reqBody.(RequestAmount); ok && amount.Amount > 0 {
 						mockDB.EXPECT().
-							AddUserBalance(gomock.Any(), db.AddAffiliateBalanceParams{
+							AddUserBalance(gomock.Any(), db.AddUserBalanceParams{
 								Balance: amount.Amount,
 								ID:      helpers.PgtypeUUID(t, tt.userId),
 							}).
-							Return(tt.mockDeductRows, tt.mockDeductErr).
+							Return(tt.mockAddRows, tt.mockAddErr).
 							Times(1)
 					}
 				}
@@ -777,3 +774,4 @@ func TestAddUserBalanceHandler(t *testing.T) {
 		})
 	}
 }
+

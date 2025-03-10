@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -27,11 +28,19 @@ func JwtMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		secretKey := os.Getenv("SECRET_KEY")
+		if secretKey == "" {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "SECRET_KEY is not set"})
+			c.Abort()
+			return
+		}
+
+		claims := jwt.MapClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return []byte(os.Getenv("SECRET_KEY")), nil
+			return []byte(secretKey), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -40,9 +49,9 @@ func JwtMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"Error": "Invalid token claims"})
+		expiration := int64(claims["exp"].(float64))
+		if time.Now().Unix() > expiration {
+			c.JSON(http.StatusUnauthorized, gin.H{"Error": "Token has expired"})
 			c.Abort()
 			return
 		}
@@ -59,5 +68,4 @@ func JwtMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
-
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/buranasakS/trading_application/helpers"
 	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -16,7 +17,11 @@ func createRandomAffiliate(t *testing.T) Affiliate {
 	masterAffiliate.Valid = true
 
 	arg := CreateAffiliateParams{
-		Name:            uuid.New().String(),
+		Name: func() string {
+			name, _ := helpers.GenerateRandomString(10)
+			return name
+		}(),
+		
 		MasterAffiliate: masterAffiliate,
 	}
 

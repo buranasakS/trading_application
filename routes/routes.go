@@ -39,7 +39,7 @@ func SetupRoutes(router *gin.Engine, h *handlers.Handler) {
 	}
 
 	userRoutes := router.Group("/users")
-	userRoutes.Use(middleware.JwtMiddleware())
+	// userRoutes.Use(middleware.JwtMiddleware())
 	{
 		// userRoutes.POST("/login", handlers.LoginUser)
 		// userRoutes.POST("/register", handlers.RegisterUser)
