@@ -106,46 +106,43 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 	if user.AffiliateID.Valid {
 		affililates := []db.Affiliate{}
 		currentAffiliateID := user.AffiliateID
-
+	
 		for currentAffiliateID.Valid {
-			affiliate, err := h.db.GetAffiliateByID(context.Background(), currentAffiliateID)
+			affiliate, err := qtx.GetAffiliateByID(context.Background(), currentAffiliateID)
 			if err != nil || !affiliate.ID.Valid {
 				break
 			}
-
 			affililates = append(affililates, affiliate)
 			currentAffiliateID = affiliate.MasterAffiliate
 		}
-
+	
 		if len(affililates) == 0 {
 			return
 		}
-
-		commissionRates := []float64{0.05, 0.10, 0.15, 0.20}
-		commissionLevel := 0
-		if len(affililates) <= len(commissionRates) {
-			commissionLevel = len(commissionRates) - len(affililates)
-		}
-
-		for i := 0; i < len(affililates); i++ {
-			var commissionAmount float64
-			level := commissionLevel + i
-
-			if level >= len(commissionRates) {
-				level = len(commissionRates) - 1
-				commissionAmount = (commissionRates[level] - commissionRates[len(commissionRates)-1]) * totalPrice
-			} else {
-				if i == 0 {
-					commissionAmount = commissionRates[level] * totalPrice
-				} else {
-					commissionAmount = (commissionRates[level] - commissionRates[level-1]) * totalPrice
-				}
-			}
-
-			if commissionAmount <= 0 {
-				continue
-			}
-
+	
+		commissionRates := []float64{0.20, 0.15, 0.10, 0.05}
+        previousCommissionRate := 0.0
+    
+        for i := 0; i < len(affililates); i++ {
+            var commissionAmount float64
+            level := len(affililates) - 1 - i 
+    
+            if level >= len(commissionRates) {
+                level = len(commissionRates) - 1
+                commissionAmount = 0.0
+            } else {
+                if level == 0 { 
+                    commissionAmount = commissionRates[0] * totalPrice
+                } else { 
+                    commissionAmount = (commissionRates[level] - previousCommissionRate) * totalPrice
+                }
+                previousCommissionRate = commissionRates[level] 
+            }
+    
+            if commissionAmount <= 0 {
+                continue
+            }
+	
 			_, err := qtx.CreateCommission(context.Background(), db.CreateCommissionParams{
 				OrderID:     pgtype.UUID{Bytes: orderID, Valid: true},
 				AffiliateID: affililates[i].ID,
@@ -155,7 +152,7 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create commission"})
 				return
 			}
-
+	
 			err = qtx.AddAffiliateBalance(context.Background(), db.AddAffiliateBalanceParams{
 				ID:      affililates[i].ID,
 				Balance: commissionAmount,
