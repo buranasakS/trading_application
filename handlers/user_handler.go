@@ -45,6 +45,15 @@ type RequestAmount struct {
 	Amount float64 `json:"amount" binding:"required"`
 }
 
+// RegisterUserHandler godoc
+// @Summary      register a new user
+// @Description  register a new user
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body      RequestUserLogin true "User details"
+// @Success      201  {object}  db.User "User created successfully"
+// @Router       /login [post]
 func (h *Handler) LoginUserHandler(c *gin.Context) {
 	var req RequestUserLogin
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -94,9 +103,9 @@ func (h *Handler) LoginUserHandler(c *gin.Context) {
 // @Tags         Users
 // @Accept       json
 // @Produce      json
-// @Param        request body      db.CreateUserParams true "User details"
+// @Param        request body      RequestUserRegister true "User request"
 // @Success      201  {object}  db.User "User created successfully"
-// @Router       /users [post]
+// @Router       /register [post]
 func (h *Handler) RegisterUserHandler(c *gin.Context) {
 	var req RequestUserRegister
 	if err := c.ShouldBindJSON(&req); err != nil {

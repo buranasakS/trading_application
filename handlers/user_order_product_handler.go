@@ -106,7 +106,8 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 	if user.AffiliateID.Valid {
 		affiliateLevel := 1
 		currentAffiliateID := user.AffiliateID
-		var previousCommissionRate float64 = 0
+		commissionRates := []float64{0.20, 0.15, 0.10, 0.05}
+		previousCommissionRate := 0.0
 
 		for currentAffiliateID.Valid {
 			affiliate, err := h.db.GetAffiliateByID(context.Background(), currentAffiliateID)
@@ -115,16 +116,9 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 			}
 
 			commissionRate := 0.0
-
-			if affiliateLevel == 1 {
-				commissionRate = 0.20
-			} else if affiliateLevel == 2 {
-				commissionRate = 0.15
-			} else if affiliateLevel == 3 {
-				commissionRate = 0.10
-			} else if affiliateLevel == 4 {
-				commissionRate = 0.05
-			} else if affiliateLevel > 4 {
+			if affiliateLevel <= len(commissionRates) {
+				commissionRate = commissionRates[affiliateLevel-1]
+			} else {
 				commissionRate = previousCommissionRate - 0.01
 				if commissionRate < 0 {
 					commissionRate = 0
@@ -132,12 +126,7 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 			}
 
 			if commissionRate > 0 {
-				var commissionAmount float64
-				if affiliateLevel <= 3 {
-					commissionAmount = commissionRate * totalPrice
-				} else {
-					commissionAmount = (previousCommissionRate - commissionRate) * totalPrice
-				}
+				commissionAmount := (previousCommissionRate - commissionRate) * totalPrice
 				_, err = qtx.CreateCommission(context.Background(), db.CreateCommissionParams{
 					OrderID:     pgtype.UUID{Bytes: orderID, Valid: true},
 					AffiliateID: affiliate.ID,
