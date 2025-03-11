@@ -4,13 +4,16 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
+	"github.com/buranasakS/trading_application/helpers"
 	"github.com/stretchr/testify/require"
 )
 
 func createRandomProduct(t *testing.T) Product {
+	name, err := helpers.GenerateRandomString(10)
+	require.NoError(t, err)
+
 	arg := CreateProductParams{
-		Name:     uuid.New().String(),
+		Name:     name,
 		Quantity: 100,
 		Price:    50.0,
 	}

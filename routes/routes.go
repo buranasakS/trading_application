@@ -15,6 +15,7 @@ func SetupRoutes(router *gin.Engine, h *handlers.Handler) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// protected := router.Group("/", middleware.JwtMiddleware())
+	
 	router.POST("/login", h.LoginUserHandler)
 	router.POST("/register", h.RegisterUserHandler)
 
