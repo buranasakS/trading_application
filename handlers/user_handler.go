@@ -261,7 +261,7 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := h.db.GetUserDetailByID(context.Background(), userId)
+	_, err := h.db.GetUserDetailByID(context.Background(), userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return
@@ -311,7 +311,7 @@ func (h *Handler) DeductUserBalanceHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, gin.H{"message": "Deduct balance completed"})
 }
 
 // AddUserBalanceHandler godoc
@@ -333,9 +333,9 @@ func (h *Handler) AddUserBalanceHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := h.db.GetUserDetailByID(context.Background(), userId)
+	_, err := h.db.GetUserDetailByID(context.Background(), userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -383,5 +383,5 @@ func (h *Handler) AddUserBalanceHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, gin.H{"message": "Add balance completed"})
 }

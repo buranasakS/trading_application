@@ -499,11 +499,6 @@ func TestDeductUserBalanceHandler(t *testing.T) {
 			reqBody: RequestAmount{
 				Amount: 100.0,
 			},
-			mockUserDetail: db.GetUserDetailByIDRow{
-				ID:       userId,
-				Username: "testuser",
-				Balance:  1000.0,
-			},
 			mockUserErr:    nil,
 			mockDeductErr:  nil,
 			mockDeductRows: 1,
@@ -649,16 +644,11 @@ func TestAddUserBalanceHandler(t *testing.T) {
 			reqBody: RequestAmount{
 				Amount: 100.0,
 			},
-			mockUserDetail: db.GetUserDetailByIDRow{
-				ID:       userId,
-				Username: "testuser",
-				Balance:  1000.0,
-			},
 			mockUserErr:   nil,
 			mockAddErr:    nil,
 			mockAddRows:   1,
 			expectedStatus: http.StatusOK,
-			expectedBody:   nil,
+			expectedBody:    gin.H{"message": "Add balance completed"},
 		},
 		{
 			name:           "Invalid User ID",
@@ -674,7 +664,7 @@ func TestAddUserBalanceHandler(t *testing.T) {
 				Amount: 100.0,
 			},
 			mockUserErr:   sql.ErrNoRows,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusBadRequest,
 			expectedBody:   gin.H{"error": "User not found"},
 		},
 		{
