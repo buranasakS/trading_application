@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"math"
 	"net/http"
 
 	"github.com/buranasakS/trading_application/config"
@@ -126,6 +125,9 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 		numLevels := len(commissionRates)
 		var previousCommissionRate float64 = commissionRates[numLevels-1]
 
+		fmt.Println(numLevels)
+		fmt.Println(previousCommissionRate)
+
 		for i := 0; i < len(affiliates); i++ {
 			var commissionAmount float64
 			level := len(affiliates) - 1 - i
@@ -135,15 +137,13 @@ func (h *Handler) UserOrderProductHandler(c *gin.Context) {
 				previousCommissionRate = commissionRates[0]
 			} else if level < numLevels {
 				commissionAmount = (commissionRates[level-1] - commissionRates[level]) * totalPrice
-				previousCommissionRate = commissionRates[level]
+				previousCommissionRate = commissionRates[level-1]
 			} else {
-				previousCommissionRate /= 2 
+				previousCommissionRate = 0
 				commissionAmount = previousCommissionRate * totalPrice
 			}
 
-			commissionAmount = math.Round(commissionAmount*100) / 100
-
-			fmt.Println(commissionAmount)
+			commissionAmount = commissionAmount * 100 / 100
 
 			if commissionAmount <= 0 {
 				continue
