@@ -140,6 +140,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/commissions/distribution/{order_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get commission by Order ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Commissions"
+                ],
+                "summary": "Get commission by Order ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Commission by order id details",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CommsisionDistributionResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/commissions/list": {
             "get": {
                 "security": [
@@ -215,6 +258,40 @@ const docTemplate = `{
                         "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "register a new user",
+                "parameters": [
+                    {
+                        "description": "User details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RequestUserLogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/db.User"
                         }
                     }
                 }
@@ -345,7 +422,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
+        "/register": {
             "post": {
                 "description": "register a new user",
                 "consumes": [
@@ -355,17 +432,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Auth"
                 ],
                 "summary": "register a new user",
                 "parameters": [
                     {
-                        "description": "User details",
+                        "description": "User request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/db.CreateUserParams"
+                            "$ref": "#/definitions/handlers.RequestUserRegister"
                         }
                     }
                 ],
@@ -675,20 +752,6 @@ const docTemplate = `{
                 }
             }
         },
-        "db.CreateUserParams": {
-            "type": "object",
-            "properties": {
-                "affiliate_id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
         "db.Product": {
             "type": "object",
             "properties": {
@@ -723,6 +786,37 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.CommissionAffiliateDetail": {
+            "type": "object",
+            "properties": {
+                "affiliate_id": {
+                    "type": "string"
+                },
+                "affiliate_name": {
+                    "type": "string"
+                },
+                "commission": {
+                    "type": "number"
+                }
+            }
+        },
+        "handlers.CommsisionDistributionResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.CommissionAffiliateDetail"
+                    }
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "total_commission": {
+                    "type": "number"
                 }
             }
         },
@@ -787,6 +881,40 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "number"
+                }
+            }
+        },
+        "handlers.RequestUserLogin": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.RequestUserRegister": {
+            "type": "object",
+            "required": [
+                "affiliate_id",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "affiliate_id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

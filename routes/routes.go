@@ -40,6 +40,7 @@ func SetupRoutes(router *gin.Engine, h *handlers.Handler) {
 	{
 		commissionRoutes.GET("/list", h.ListCommissionsHandler)
 		commissionRoutes.GET("/:id", h.GetCommissionDetailHandler)
+		commissionRoutes.GET("/distribution/:order_id", h.GetCommissionDistributionHandler)
 	}
 
 	userRoutes := router.Group("/users")

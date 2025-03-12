@@ -24,7 +24,9 @@ type Querier interface {
 	GetAffiliateByID(ctx context.Context, id pgtype.UUID) (Affiliate, error)
 	GetAffiliateByUserID(ctx context.Context, id pgtype.UUID) (GetAffiliateByUserIDRow, error)
 	GetCommissionByID(ctx context.Context, id pgtype.UUID) (Commission, error)
+	GetCommissionByOrderID(ctx context.Context, orderID pgtype.UUID) ([]GetCommissionByOrderIDRow, error)
 	GetProductByID(ctx context.Context, id pgtype.UUID) (Product, error)
+	GetTotalCommission(ctx context.Context, orderID pgtype.UUID) (float64, error)
 	GetUserByUsernameForLogin(ctx context.Context, username string) (GetUserByUsernameForLoginRow, error)
 	GetUserDetailByID(ctx context.Context, id pgtype.UUID) (GetUserDetailByIDRow, error)
 	ListAffiliates(ctx context.Context) ([]Affiliate, error)
@@ -35,7 +37,3 @@ type Querier interface {
 }
 
 var _ Querier = (*Queries)(nil)
-
-// BeginTx(ctx context.Context, options pgx.TxOptions) (pgx.Tx, error)
-// 	Commit(ctx context.Context) error
-// 	Rollback(ctx context.Context) error

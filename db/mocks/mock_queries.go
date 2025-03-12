@@ -230,6 +230,21 @@ func (mr *MockQuerierMockRecorder) GetCommissionByID(ctx, id interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommissionByID", reflect.TypeOf((*MockQuerier)(nil).GetCommissionByID), ctx, id)
 }
 
+// GetCommissionByOrderID mocks base method.
+func (m *MockQuerier) GetCommissionByOrderID(ctx context.Context, orderID pgtype.UUID) ([]db.GetCommissionByOrderIDRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommissionByOrderID", ctx, orderID)
+	ret0, _ := ret[0].([]db.GetCommissionByOrderIDRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCommissionByOrderID indicates an expected call of GetCommissionByOrderID.
+func (mr *MockQuerierMockRecorder) GetCommissionByOrderID(ctx, orderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommissionByOrderID", reflect.TypeOf((*MockQuerier)(nil).GetCommissionByOrderID), ctx, orderID)
+}
+
 // GetProductByID mocks base method.
 func (m *MockQuerier) GetProductByID(ctx context.Context, id pgtype.UUID) (db.Product, error) {
 	m.ctrl.T.Helper()
@@ -243,6 +258,21 @@ func (m *MockQuerier) GetProductByID(ctx context.Context, id pgtype.UUID) (db.Pr
 func (mr *MockQuerierMockRecorder) GetProductByID(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductByID", reflect.TypeOf((*MockQuerier)(nil).GetProductByID), ctx, id)
+}
+
+// GetTotalCommission mocks base method.
+func (m *MockQuerier) GetTotalCommission(ctx context.Context, orderID pgtype.UUID) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTotalCommission", ctx, orderID)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTotalCommission indicates an expected call of GetTotalCommission.
+func (mr *MockQuerierMockRecorder) GetTotalCommission(ctx, orderID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTotalCommission", reflect.TypeOf((*MockQuerier)(nil).GetTotalCommission), ctx, orderID)
 }
 
 // GetUserByUsernameForLogin mocks base method.

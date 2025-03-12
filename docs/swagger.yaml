@@ -30,15 +30,6 @@ definitions:
       quantity:
         type: integer
     type: object
-  db.CreateUserParams:
-    properties:
-      affiliate_id:
-        type: string
-      password:
-        type: string
-      username:
-        type: string
-    type: object
   db.Product:
     properties:
       id:
@@ -62,6 +53,26 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  handlers.CommissionAffiliateDetail:
+    properties:
+      affiliate_id:
+        type: string
+      affiliate_name:
+        type: string
+      commission:
+        type: number
+    type: object
+  handlers.CommsisionDistributionResponse:
+    properties:
+      details:
+        items:
+          $ref: '#/definitions/handlers.CommissionAffiliateDetail'
+        type: array
+      order_id:
+        type: string
+      total_commission:
+        type: number
     type: object
   handlers.ErrorResponse:
     properties:
@@ -103,6 +114,29 @@ definitions:
         type: number
     required:
     - amount
+    type: object
+  handlers.RequestUserLogin:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handlers.RequestUserRegister:
+    properties:
+      affiliate_id:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - affiliate_id
+    - password
+    - username
     type: object
   handlers.ResponseUser:
     properties:
@@ -242,6 +276,33 @@ paths:
       summary: Get commission by ID
       tags:
       - Commissions
+  /commissions/distribution/{order_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get commission by Order ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Commission by order id details
+          schema:
+            $ref: '#/definitions/handlers.CommsisionDistributionResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get commission by Order ID
+      tags:
+      - Commissions
   /commissions/list:
     get:
       consumes:
@@ -265,6 +326,28 @@ paths:
       summary: List all commissions
       tags:
       - Commissions
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: register a new user
+      parameters:
+      - description: User details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RequestUserLogin'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/db.User'
+      summary: register a new user
+      tags:
+      - Auth
   /products:
     post:
       consumes:
@@ -343,18 +426,18 @@ paths:
       summary: List all products
       tags:
       - Products
-  /users:
+  /register:
     post:
       consumes:
       - application/json
       description: register a new user
       parameters:
-      - description: User details
+      - description: User request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/db.CreateUserParams'
+          $ref: '#/definitions/handlers.RequestUserRegister'
       produces:
       - application/json
       responses:
@@ -364,7 +447,7 @@ paths:
             $ref: '#/definitions/db.User'
       summary: register a new user
       tags:
-      - Users
+      - Auth
   /users/{id}:
     get:
       consumes:

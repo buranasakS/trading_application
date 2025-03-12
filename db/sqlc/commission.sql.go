@@ -49,6 +49,50 @@ func (q *Queries) GetCommissionByID(ctx context.Context, id pgtype.UUID) (Commis
 	return i, err
 }
 
+const getCommissionByOrderID = `-- name: GetCommissionByOrderID :many
+SELECT a.id, a.name, c.amount 
+FROM commissions c 
+JOIN affiliates a ON c.affiliate_id = a.id 
+WHERE c.order_id = $1
+`
+
+type GetCommissionByOrderIDRow struct {
+	ID     pgtype.UUID `json:"id"`
+	Name   string      `json:"name"`
+	Amount float64     `json:"amount"`
+}
+
+func (q *Queries) GetCommissionByOrderID(ctx context.Context, orderID pgtype.UUID) ([]GetCommissionByOrderIDRow, error) {
+	rows, err := q.db.Query(ctx, getCommissionByOrderID, orderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCommissionByOrderIDRow{}
+	for rows.Next() {
+		var i GetCommissionByOrderIDRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.Amount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTotalCommission = `-- name: GetTotalCommission :one
+SELECT SUM(amount)::FLOAT FROM commissions WHERE order_id = $1
+`
+
+func (q *Queries) GetTotalCommission(ctx context.Context, orderID pgtype.UUID) (float64, error) {
+	row := q.db.QueryRow(ctx, getTotalCommission, orderID)
+	var column_1 float64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const listCommissions = `-- name: ListCommissions :many
 SELECT id, order_id, affiliate_id, amount FROM commissions
 `

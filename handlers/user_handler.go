@@ -48,7 +48,7 @@ type RequestAmount struct {
 // RegisterUserHandler godoc
 // @Summary      register a new user
 // @Description  register a new user
-// @Tags         Users
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        request body      RequestUserLogin true "User details"
@@ -100,7 +100,7 @@ func (h *Handler) LoginUserHandler(c *gin.Context) {
 // RegisterUserHandler godoc
 // @Summary      register a new user
 // @Description  register a new user
-// @Tags         Users
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        request body      RequestUserRegister true "User request"
